@@ -1,8 +1,21 @@
 import Koa from "koa"
 import consola from "consola"
 import { Nuxt, Builder }  from "nuxt"
+import mongoose from 'mongoose'
+import dbConfig from './dbs/config'
+import bodyParser from 'koa-bodyparser' // 处理POST请求的body
+
+import articles from './interface/articles'
 
 const app = new Koa()
+
+app.use(bodyParser({
+  extendTypes:['json','form','text']
+}))
+
+mongoose.connect(dbConfig.dbs,{
+  useNewUrlParser:true
+})
 
 // Import and Set Nuxt.js options
 import config from "../nuxt.config.js"
@@ -25,6 +38,8 @@ async function start() {
   } else {
     await nuxt.ready()
   }
+
+  app.use(articles.routes()).use(articles.allowedMethods());
 
   app.use(ctx => {
     ctx.status = 200
