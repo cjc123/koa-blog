@@ -1,41 +1,57 @@
 <template>
   <div>
     <ul>
-      <li>
-        <router-link :to="{name:'article-detail'}">
-          <h2 class="title">标题</h2>
-          <div class="desc">描述</div>
-        </router-link>
+      <li v-for="(item,index) in articleList" :key="index">
+        <nuxt-link :to="{name:'article-detail-id',params:{id:item._id}}">
+          <h2 class="title">{{item.title}}</h2>
+          <div class="desc">{{item.desc}}</div>
+        </nuxt-link>
       </li>
     </ul>
-    <el-pagination background layout="prev, pager, next" :total="1000"></el-pagination>
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="count"
+      :page-size="1"
+      :current-page.sync="currentPage"
+      @current-change="currentChange"
+    ></el-pagination>
   </div>
 </template>
 
 <script>
-// 使用axios
-// 一般情况下，在组件中，可以这样使用：
-
-// this.$axios.get(url).then( res -> {...});
-// 而在asyncData中，不能直接使用this引用。可以这样：
-
-// async asyncData ({ app }) {
-//     // 这里data等同于上面的res.data
-//     let { data } = await app.$axios.get(url).then( res -> {...});
-// }
 
 export default {
+  data() {
+    return { currentPage: 1, count: 0, articleList: [] };
+  },
   components: {},
-  created() {
-    this.$axios
-      .get("http://localhost:3000/articles/test", { test: "test" })
-      .then(res => {});
-    // this.$axios
-    //   .post("http://localhost:3000/articles/addArticle", {
-    //     title: "哈哈哈",
-    //     content: "是测试"
-    //   })
-    //   .then(res => {});
+  async asyncData({ app, params }) {
+    const { id } = params;
+    const {
+      data: {
+        code,
+        content: { count, list }
+      }
+    } = await app.$axios({
+      method: "get",
+      url: "/articles/articleList",
+      params: {
+        page: id,
+        pageSize: 1
+      }
+    });
+    if (code === 0) {
+      return { currentPage: +id, count, articleList: list };
+    }
+  },
+  methods: {
+    currentChange(value) {
+      this.$router.push({
+        name: "article-id",
+        params: { id: value }
+      });
+    }
   }
 };
 </script>

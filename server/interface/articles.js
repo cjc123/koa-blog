@@ -1,30 +1,61 @@
-import Router from 'koa-router';
-import Article from '../dbs/models/article'
+import Router from "koa-router";
+import Article from "../dbs/models/article";
 
-let router = new Router({prefix: '/articles'});
+let router = new Router({ prefix: "/articles" });
 
-router.get('/test', async (ctx, next) => {
-    ctx.body = {
-        code: 0,
-        content:"test"
-      }
-})
-
-router.post('/addArticle', async (ctx, next) => {
-  console.log(ctx.request.body)
-  const {title,content} = ctx.request.body;
-  let article = new Article({title, content})
-  let result = await article.save()
-  if (result) {
-    ctx.body = {
-      code: 0,
-    }
-  }else{
+// 文章列表
+router.get("/articleList", async (ctx, next) => {
+  const { page, pageSize } = ctx.request.query;
+  if (!page || !pageSize) {
     ctx.body = {
       code: -1,
-    }
+      content: "",
+      msg: "参数错误"
+    };
+    return;
   }
-  
-})
+  const count = await Article.countDocuments();
+  const data = await Article.find({}, "_id title desc")
+    .skip((page - 1) * pageSize)
+    .limit(+pageSize)
+    .sort({ _id: -1 });
+
+  ctx.body = {
+    code: 0,
+    content: { count, list: data }
+  };
+});
+
+// 文章详情
+router.get("/articleDetail", async (ctx, next) => {
+  const { id } = ctx.request.query;
+  const data = await Article.findOne({ _id: id }, "_id title content");
+  ctx.body = {
+    code: 0,
+    content: data
+  };
+});
+
+// 新增文章
+router.post("/addArticle", async (ctx, next) => {
+  const { title, content, desc } = ctx.request.body;
+  if (!title || !content) {
+    ctx.body = {
+      code: -1
+    };
+    return;
+  }
+  let article = new Article({ title, content, desc });
+  let result = await article.save();
+  if (result) {
+    ctx.body = {
+      code: 0
+    };
+  } else {
+    ctx.body = {
+      code: -1
+    };
+  }
+});
 
 export default router;
