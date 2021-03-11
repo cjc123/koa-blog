@@ -1,5 +1,5 @@
-import Router from "koa-router";
-import Article from "../dbs/models/article";
+const Router = require("koa-router");
+const Article = require("../dbs/models/article");
 
 let router = new Router({ prefix: "/articles" });
 
@@ -58,4 +58,4 @@ router.post("/addArticle", async (ctx, next) => {
   }
 });
 
-export default router;
+module.exports =  router;

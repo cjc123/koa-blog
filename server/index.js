@@ -1,11 +1,10 @@
-import Koa from "koa"
-import consola from "consola"
-import { Nuxt, Builder }  from "nuxt"
-import mongoose from 'mongoose'
-import dbConfig from './dbs/config'
-import bodyParser from 'koa-bodyparser' // 处理POST请求的body
-
-import articles from './interface/articles'
+const Koa = require('koa')
+const consola = require('consola')
+const { Nuxt, Builder } = require('nuxt')
+const bodyParser = require('koa-bodyparser') // 处理POST请求的body
+const mongoose = require('mongoose')
+const dbConfig = require('./dbs/config')
+const articles = require('./interface/articles')
 
 const app = new Koa()
 
@@ -18,7 +17,7 @@ mongoose.connect(dbConfig.dbs,{
 })
 
 // Import and Set Nuxt.js options
-import config from "../nuxt.config.js"
+const config = require('../nuxt.config.js')
 
 config.dev = !(app.env === 'production')
 
